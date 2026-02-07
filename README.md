@@ -90,7 +90,7 @@ Public API: Exposing ward-level safety ratings for third-party real estate and h
 
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-Developed by Team AR27 for Jaipur Smart City Hackathon 2026.
+ Developed by Team AR27 for Jaipur Smart City Hackathon 2026.
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
