@@ -1,17 +1,19 @@
-# EcoSense: Hyperlocal Environmental Intelligence Platform
-
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ward-pollution-dashboard.streamlit.app/)
-![Python Version](https://img.shields.io/badge/Python-3.9%2B-00599C)
-![AI Model](https://img.shields.io/badge/AI-Gemini%201.5%20Pro%20%26%20Flash-4285F4)
-![License](https://img.shields.io/badge/License-MIT-green)
+<img width="1600" height="900" alt="image" src="https://github.com/user-attachments/assets/ef5e0484-b963-436f-a7bb-7715b64fc0a4" /><img width="1600" height="900" alt="image" src="https://github.com/user-attachments/assets/6b91c66f-8408-4d87-9b38-53732b6908e4" /># EcoSense: Hyperlocal Environmental Intelligence Platform
 
 **EcoSense** is a decision-support system designed for the Jaipur Pollution Control Board. It bridges the gap between raw sensor data and administrative action by utilizing stochastic modeling for policy simulation and computer vision for ground-truth verification.
 
+project interface:-
+
+<img width="1600" height="900" alt="image" src="https://github.com/user-attachments/assets/112d0723-2d45-41ec-8b9c-42d688ccd1b7" />
+<img width="1600" height="900" alt="image" src="https://github.com/user-attachments/assets/01af9bc7-e32d-4462-8fb1-12794e3c3319" />
+<img width="1600" height="900" alt="image" src="https://github.com/user-attachments/assets/8074aa3b-bea1-4ff1-880b-d1eca2e3d345" />
+<img width="1600" height="900" alt="image" src="https://github.com/user-attachments/assets/a7f800cb-bd10-40fd-a7fb-9b7a879972fb" />
+
 ---
 
-## 🔗 [Launch Live Dashboard](https://ward-pollution-dashboard.streamlit.app/)
+## 🔗 [Launch Live Dashboard](https://ward-pollution-dashboard-a6f9eu3suvv3pbh8shntdx.streamlit.app/)
 * **Access Level:** Admin / Field Officer
-* **Demo Credentials:** `admin`
+* **ADMIN_PASSWORD = "admin"
 
 ---
 
@@ -48,7 +50,7 @@ The system reduces administrative latency by automating the "Last Mile" of pollu
 | :-----------------------| :----------------------------------------|
 | **Frontend Framework**  | Streamlit (Custom CSS for Enterprise UI) |
 | **Geospatial Engine**   | Folium / Leaflet.js (Heatmap Rendering)  |
-| **Reasoning Model**     | Google Gemini Pro (Policy Logic & NLP)   |
+| **Reasoning Model**     | Gemini Api   |
 | **Vision Model**        | Google Gemini 1.5 Flash (Image Analysis) |
 | **Data Processing**     | Pandas, NumPy (Vectorized Operations)    |
 | **Visualization**       | Plotly Express (Interactive Analytics)   |
@@ -62,7 +64,7 @@ To deploy EcoSense in a local environment for development or testing:
 
 **1. Clone the Repository**
 
-git clone [https://github.com/your-username/ward-pollution-dashboard.git](https://github.com/your-username/ward-pollution-dashboard.git)
+git clone [https://github.com/23f3003413/ward-pollution-dashboard]
 cd ward-pollution-dashboard
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -74,16 +76,7 @@ source venv/bin/activate  # On Windows use: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-#Configuration Create a .streamlit/secrets.toml file in the root directory with the following keys:
-
-OWM_KEY = "your_openweather_api_key"
-GEMINI_KEY = "your_google_gemini_key"
-GEMINI_VISION_KEY = "your_google_gemini_key"
-ADMIN_PASSWORD = "admin"
-
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Execution - streamlit run app.py
+Execution = streamlit run app.py
 
 
 
