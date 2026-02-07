@@ -1,8 +1,8 @@
-<img width="1600" height="900" alt="image" src="https://github.com/user-attachments/assets/ef5e0484-b963-436f-a7bb-7715b64fc0a4" /><img width="1600" height="900" alt="image" src="https://github.com/user-attachments/assets/6b91c66f-8408-4d87-9b38-53732b6908e4" /># EcoSense: Hyperlocal Environmental Intelligence Platform
+****WARD POLLUTION DASHBOARD****
 
 **EcoSense** is a decision-support system designed for the Jaipur Pollution Control Board. It bridges the gap between raw sensor data and administrative action by utilizing stochastic modeling for policy simulation and computer vision for ground-truth verification.
 
-project interface:-
+****project interface:-****
 
 <img width="1600" height="900" alt="image" src="https://github.com/user-attachments/assets/112d0723-2d45-41ec-8b9c-42d688ccd1b7" />
 <img width="1600" height="900" alt="image" src="https://github.com/user-attachments/assets/01af9bc7-e32d-4462-8fb1-12794e3c3319" />
@@ -89,7 +89,7 @@ Public API: Exposing ward-level safety ratings for third-party real estate and h
 
 
 
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 Developed by Team AR27 for Jaipur Smart City Hackathon 2026.
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
