@@ -11,7 +11,7 @@
 
 ---
 
-## 🔗 [Launch Live Dashboard](https://ward-pollution-dashboard-a6f9eu3suvv3pbh8shntdx.streamlit.app/)
+🔗 [Launch Live Dashboard] = [https://ward-pollution-dashboard-a6f9eu3suvv3pbh8shntdx.streamlit.app/]
 * **Access Level:** Admin / Field Officer
 * **ADMIN_PASSWORD = "admin"
 
