@@ -28,24 +28,24 @@ Unlike traditional dashboards that merely *display* data, EcoSense *simulates* t
 
 ## 2. Core Modules & Capabilities
 
-### 🧠 A. The Stochastic Policy Engine (Predictive Analytics)
+###  A. The Stochastic Policy Engine (Predictive Analytics)
 At the heart of EcoSense is a Monte Carlo simulation engine that models the dispersion of PM2.5 and NO2 based on ward typology (Industrial vs. Residential).
 * **"What-If" Scenarios:** Administrators can toggle interventions (e.g., Odd-Even, Smog Guns) to visualize the 72-hour AQI decay curve.
 * **Mathematical Framework:**
     $$AQI_{final} = AQI_{current} - \sum (AQI_{current} \times \alpha_{policy} \times \beta_{compliance})$$
     *(Where $\alpha$ is the theoretical reduction factor and $\beta$ is the granular compliance rate of the specific ward.)*
 
-### 💸 B. Fiscal Impact & Resource Allocation (New)
+###  B. Fiscal Impact & Resource Allocation (New)
 Governance requires budgeting. EcoSense includes a real-time **Financial Estimation Module** that runs parallel to the environmental simulation.
 * **Dynamic Costing:** Instantly calculates daily operational expenditure (OpEx) for deployed resources (Manpower + Equipment) based on **Rajasthan Minimum Wages Act 2024** and **CPCB Tender Rates**.
-* **🤖 AI Budget Auditor:** An autonomous AI agent (powered by Gemini 1.5 Flash) reviews every proposed budget in real-time, providing a justification report to ensure fiscal responsibility and prevent overspending.
+* ** AI Budget Auditor:** An autonomous AI agent (powered by Gemini 1.5 Flash) reviews every proposed budget in real-time, providing a justification report to ensure fiscal responsibility and prevent overspending.
 
-### 👁️ C. Citizen Sentinel (Computer Vision Verification)
+###  C. Citizen Sentinel (Computer Vision Verification)
 To counter sensor calibration drift, the system employs a "Human-in-the-Loop" verification layer.
 * **Visual Forensics:** Field officers or citizens upload images of suspected violations.
 * **AI Analysis:** The Vision Model identifies specific pollutant sources (e.g., *Stubble Burning vs. Construction Dust*), estimates severity, and tags the geolocation for enforcement squads.
 
-### 📜 D. Automated Bureaucracy (Generative Drafting)
+###  D. Automated Bureaucracy (Generative Drafting)
 Reduces administrative latency from hours to seconds.
 * **Smart Drafting:** Generates legally binding **Show Cause Notices**, **Health Advisories**, and **Police Dispatch Orders**.
 * **Vernacular Support:** Outputs documents in both **English** and **Hindi (Devanagari)** to ensure effective communication with local stakeholders.
@@ -114,7 +114,7 @@ Implementation: API integration with drone surveillance grids. When the Heatmap 
 
 👥 Contributors & License
 
-Ritik Joshi (Team AR27)
+Ritik Joshi , Anjali Prajapat
 
 Event: Jaipur Smart City Hackathon 2026
 
