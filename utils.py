@@ -4,6 +4,7 @@ import pandas as pd
 import google.generativeai as genai
 from datetime import datetime, timedelta
 from PIL import Image
+import streamlit as st
 
 # --- CONSTANTS ---
 JAIPUR_COORDS = {"lat": 26.9124, "lon": 75.7873}
@@ -21,7 +22,6 @@ WARDS = {
     "Chandpol": {"lat": 26.92, "lon": 75.80, "type": "Market", "risk_factor": 1.5, "pop_density": "Very High"}
 }
 
-# OFFICER ROSTER
 OFFICER_DB = {
     "Sitapura Ind. Area": {"Name": "Insp. Rajesh Verma", "ID": "IND-88", "Unit": "Industrial Squad", "Phone": "+91-9876543210"},
     "Raja Park": {"Name": "Off. Suman Singh", "ID": "COM-12", "Unit": "City Patrol", "Phone": "+91-9876543211"},
@@ -35,6 +35,65 @@ class PollutionEngine:
         self.owm_key = owm_key
         self.gemini_key = gemini_key
         self.vision_key = vision_key if vision_key else gemini_key
+        
+        # Configure once at startup
+        if self.gemini_key:
+            genai.configure(api_key=self.gemini_key)
+            # DYNAMICALLY FIND A WORKING MODEL
+            self.active_model_name = self._get_working_model_name()
+            print(f"✅ PollutionEngine initialized using model: {self.active_model_name}")
+        else:
+            self.active_model_name = "gemini-pro" # Fallback
+
+    def _get_working_model_name(self):
+        """
+        Asks Google: 'What models do I have access to?' and picks the best one.
+        This fixes the 404 error permanently.
+        """
+        try:
+            available_models = []
+            for m in genai.list_models():
+                if 'generateContent' in m.supported_generation_methods:
+                    available_models.append(m.name)
+            
+            # Priority: Flash -> Pro -> 1.5 -> Any
+            for m in available_models:
+                if "flash" in m and "1.5" in m: return m
+            for m in available_models:
+                if "flash" in m: return m
+            for m in available_models:
+                if "pro" in m and "1.5" in m: return m
+            
+            # If no specific priority found, take the first valid one
+            if available_models:
+                return available_models[0]
+                
+            return "models/gemini-1.5-flash" # Absolute fallback
+        except Exception as e:
+            print(f"⚠️ Model Discovery Failed: {e}")
+            return "gemini-pro"
+
+    def _smart_generate(self, prompt, is_vision=False, image=None):
+        if not self.gemini_key: return "⚠️ API Key Missing in secrets.toml"
+        
+        try:
+            # Use the dynamically found model
+            model = genai.GenerativeModel(self.active_model_name)
+            
+            if is_vision and image:
+                # Vision often requires specific models, try 'gemini-1.5-flash' explicitly if the default fails
+                try:
+                    response = model.generate_content([prompt, image])
+                except:
+                    # Fallback for vision specifically
+                    vision_model = genai.GenerativeModel("models/gemini-1.5-flash")
+                    response = vision_model.generate_content([prompt, image])
+            else:
+                response = model.generate_content(prompt)
+                
+            return response.text
+        except Exception as e:
+            return f"⚠️ AI Error ({self.active_model_name}): {str(e)}"
 
     def get_ward_officer(self, ward_name):
         return OFFICER_DB.get(ward_name, {
@@ -105,76 +164,58 @@ class PollutionEngine:
         return pd.DataFrame({"Time": hours[::-1], "AQI": aqi_levels[::-1]})
 
     def simulate_policy_impact(self, current_aqi, current_no2, ward_type, active_policies):
-        """
-        Calculates impact and returns sophisticated math data.
-        Returns: (predicted_aqi, breakdown_dataframe, forecast_dataframe)
-        """
         predicted_aqi = current_aqi
         impact_data = []
+        cost_data = []
+        total_daily_cost = 0
 
-        policy_weights = {
-            "odd_even": {"reduction": 0.15, "name": "Odd-Even Scheme", "target": ["Traffic Hub", "Commercial", "Market"]}, 
-            "construction_ban": {"reduction": 0.20, "name": "Construction Halt", "target": ["Residential", "Commercial"]}, 
-            "factory_shutdown": {"reduction": 0.35, "name": "Factory Shutdown", "target": ["Industrial"]}, 
-            "smog_guns": {"reduction": 0.08, "name": "Anti-Smog Guns", "target": ["All"]}, 
-            "ev_zone_only": {"reduction": 0.25, "name": "EV-Only Zone", "target": ["Traffic Hub", "Green Zone"]}
+        policy_config = {
+            "odd_even": {"name": "Odd-Even Scheme", "reduction": 0.15, "target": ["Traffic Hub", "Commercial", "Market"], "base_cost": 15000, "manpower": 20, "unit_desc": "Deployment Teams"}, 
+            "construction_ban": {"name": "Construction Halt", "reduction": 0.20, "target": ["Residential", "Commercial"], "base_cost": 6500, "manpower": 4, "unit_desc": "Enforcement Squads"}, 
+            "factory_shutdown": {"name": "Factory Shutdown", "reduction": 0.35, "target": ["Industrial"], "base_cost": 8000, "manpower": 6, "unit_desc": "Inspection Teams"}, 
+            "smog_guns": {"name": "Anti-Smog Guns", "reduction": 0.08, "target": ["All"], "base_cost": 5000, "manpower": 2, "unit_desc": "Units Deployed"}, 
+            "ev_zone_only": {"name": "EV-Only Zone", "reduction": 0.25, "target": ["Traffic Hub", "Green Zone"], "base_cost": 4000, "manpower": 4, "unit_desc": "Checkpoints"}
         }
+        scale_multiplier = 2 if ward_type in ["Industrial", "Traffic Hub"] else 1
 
         for policy in active_policies:
-            if policy in policy_weights:
-                rule = policy_weights[policy]
+            if policy in policy_config:
+                rule = policy_config[policy]
                 if ward_type in rule["target"] or "All" in rule["target"]:
                     drop = int(current_aqi * rule["reduction"])
                     predicted_aqi -= drop
-                    # Detailed Math Record
-                    impact_data.append({
-                        "Strategy": rule["name"],
-                        "Effectiveness (α)": f"{int(rule['reduction']*100)}%",
-                        "Impact (Δ AQI)": f"-{drop}",
-                        "Confidence": "95% (p<0.05)"
-                    })
+                    impact_data.append({"Strategy": rule["name"], "Effectiveness (α)": f"{int(rule['reduction']*100)}%", "Impact (Δ AQI)": f"-{drop}", "Confidence": "High"})
+                    units = 1 * scale_multiplier
+                    equipment_cost = rule["base_cost"] * units
+                    labor_cost = rule["manpower"] * 500 * units
+                    daily_total = equipment_cost + labor_cost
+                    total_daily_cost += daily_total
+                    cost_data.append({"Item Description": rule["name"], "Unit Type": rule["unit_desc"], "Units": units, "Equipment Cost (₹)": f"{equipment_cost:,}", "Manpower Cost (₹)": f"{labor_cost:,}", "Total Daily Cost (₹)": f"{daily_total:,}"})
                 else:
-                    impact_data.append({
-                        "Strategy": rule["name"],
-                        "Effectiveness (α)": "0%",
-                        "Impact (Δ AQI)": "0",
-                        "Confidence": "Low Relevance"
-                    })
-        
-        # 3-Day Forecast Logic
-        predicted_aqi = max(predicted_aqi, 30)
-        forecast_data = [
-            {"Day": "Day 1 (Immediate)", "Predicted AQI": predicted_aqi},
-            {"Day": "Day 2 (Sustained)", "Predicted AQI": int(predicted_aqi * 0.95)}, # 5% further drop
-            {"Day": "Day 3 (Optimized)", "Predicted AQI": int(predicted_aqi * 0.92)}  # 8% further drop
-        ]
+                    impact_data.append({"Strategy": rule["name"], "Effectiveness (α)": "0%", "Impact (Δ AQI)": "0", "Confidence": "N/A"})
 
-        return predicted_aqi, pd.DataFrame(impact_data), pd.DataFrame(forecast_data)
+        predicted_aqi = max(predicted_aqi, 30)
+        forecast_data = [{"Day": "Day 1", "Predicted AQI": predicted_aqi}, {"Day": "Day 2", "Predicted AQI": int(predicted_aqi * 0.95)}, {"Day": "Day 3", "Predicted AQI": int(predicted_aqi * 0.92)}]
+        
+        if cost_data:
+            cost_data.append({"Item Description": "<b>TOTAL PROJECTED BUDGET</b>", "Unit Type": "-", "Units": "-", "Equipment Cost (₹)": "-", "Manpower Cost (₹)": "-", "Total Daily Cost (₹)": f"<b>₹{total_daily_cost:,}</b>"})
+
+        return predicted_aqi, pd.DataFrame(impact_data), pd.DataFrame(forecast_data), pd.DataFrame(cost_data)
+
+    def generate_ai_budget_report(self, active_policies, ward_profile, estimated_cost):
+        policy_list = ", ".join([p.replace('_', ' ').title() for p in active_policies])
+        prompt = f"Act as a Financial Auditor. Context: Ward: {ward_profile['Ward']} ({ward_profile['Type']}), Policies: {policy_list}, Estimated Cost: ₹{estimated_cost}. Task: Justify costs & suggest savings. Keep it concise."
+        return self._smart_generate(prompt, is_vision=False)
 
     def generate_segmented_report(self, ward_data, category, language="English"):
-        if not self.gemini_key: return "⚠️ System Error: GEMINI_KEY missing in secrets.toml"
-        genai.configure(api_key=self.gemini_key)
-        model = genai.GenerativeModel('gemini-pro')
         lang_instruction = "Translate response to Hindi (Devanagari script)." if language == "Hindi" else "Response in English."
         prompts = {
             "Industrial": f"Draft a strict legal show-cause notice for factories in {ward_data['Ward']} (Type: {ward_data['Type']}, AQI: {ward_data['AQI']}). Cite relevant Indian Environmental Protection Acts. {lang_instruction}",
             "Public": f"Write a clear, urgent health advisory for citizens in {ward_data['Ward']} regarding high PM2.5 levels. Recommend specific masks (N95) and outdoor timings. {lang_instruction}",
             "Traffic": f"Create a tactical deployment plan for Traffic Police in {ward_data['Ward']}. Focus on choke points, vehicle checks, and diverting heavy diesel trucks. {lang_instruction}"
         }
-        try:
-            response = model.generate_content(prompts.get(category, prompts["Public"]))
-            return response.text
-        except Exception as e:
-            return f"⚠️ Generation Failed. Error: {str(e)}"
+        return self._smart_generate(prompts.get(category, prompts["Public"]), is_vision=False)
 
     def analyze_uploaded_image(self, image):
-        if not self.vision_key: return "⚠️ Vision API Key Missing"
-        genai.configure(api_key=self.vision_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')
         prompt = "Analyze this image for environmental pollution. 1. Identify source. 2. Estimate Severity. 3. Recommend action."
-        try:
-            response = model.generate_content([prompt, image])
-            return response.text
-        except Exception as e:
-            print(f"Vision Error: {e}")
-            return f"⚠️ Vision Analysis Failed. Error: {str(e)}"
+        return self._smart_generate(prompt, is_vision=True, image=image)
